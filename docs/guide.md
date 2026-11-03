@@ -19,7 +19,7 @@ Install **nimblescape Mindbug** from the Visual Studio Marketplace: search for "
 code --install-extension nimblescape.nimblescape-mindbug
 ```
 
-To install a package file (`.vsix`), for example from a [GitHub release](https://github.com/nimblescape/nimblescape-mindbug/releases), run `code --install-extension nimblescape-mindbug-<version>.vsix`, or select **Install from VSIX…** in the **…** menu of the Extensions view.
+To install a package file (`.vsix`), for example from a [GitHub release](https://github.com/nimblescape/mindbug-vscode/releases), run `code --install-extension nimblescape-mindbug-<version>.vsix`, or select **Install from VSIX…** in the **…** menu of the Extensions view.
 
 ## First steps
 
@@ -50,7 +50,7 @@ The view has two areas: the **STACK** on the left and the **HEAP** on the right.
 - When you step to the end of a function, its scope shows **Return value**, the value that the function gives back. A constructor shows no return value: `new` gives the new object, not a value of the constructor.
 - A variable that holds an object or an array stores only *where* the object is on the heap. The view draws this as an arrow from the variable to the object.
 
-![Block scopes in the Global scope: the if scope with e inside the for body scope with d, inside the for scope with i, inside the block scope with the second a; the a of the Global scope is at the bottom](https://raw.githubusercontent.com/nimblescape/nimblescape-mindbug/main/docs/images/blocks.png)
+![Block scopes in the Global scope: the if scope with e inside the for body scope with d, inside the for scope with i, inside the block scope with the second a; the a of the Global scope is at the bottom](https://raw.githubusercontent.com/nimblescape/mindbug-vscode/main/docs/images/blocks.png)
 
 ### Heap
 
@@ -62,7 +62,7 @@ The view has two areas: the **STACK** on the left and the **HEAP** on the right.
 - Arrays are a row of cells, with the index at the top left of each cell. Maps and sets are tables.
 - **Classes** are at the top of the heap, because in JavaScript a class is also an object. A class box shows the **static variables** (class variables) with their values, underlined as in UML, the attributes that each object gets, and the methods. A subclass shows "extends" and the UML arrow to its superclass. Move the mouse over an object to see a dashed arrow to its class.
 
-![Classes with static variables, objects made from them, and the dashed arrow from an object to its class](https://raw.githubusercontent.com/nimblescape/nimblescape-mindbug/main/docs/images/classes.png)
+![Classes with static variables, objects made from them, and the dashed arrow from an object to its class](https://raw.githubusercontent.com/nimblescape/mindbug-vscode/main/docs/images/classes.png)
 
 ### Changes
 
@@ -89,7 +89,7 @@ Each time the program pauses, at a breakpoint or after a step, the view saves a 
 
 The editor shows the line where the program was at that step, also when that line is in another file or the file was closed. It marks the line as the debugger marks a function call that you select in its Call Stack view, with a green arrow and a green line, and writes the step at the end of the line, for example "Mindbug: step 8 of 14": the view shows step 8, and the program is at step 14. The yellow line of the debugger stays the current position of the program. **Show current step** (or End) goes back to the newest step.
 
-![An earlier step in the dark theme: step 8 is selected in the step list](https://raw.githubusercontent.com/nimblescape/nimblescape-mindbug/main/docs/images/history-dark.png)
+![An earlier step in the dark theme: step 8 is selected in the step list](https://raw.githubusercontent.com/nimblescape/mindbug-vscode/main/docs/images/history-dark.png)
 
 The view keeps the steps of the newest debug session, at most `nimblescape.mindbug.maxHistorySteps` steps; then the oldest steps go away. A new debug session starts a new history, and so does **Restart** (Ctrl+Shift+F5) of the debugger: the steps of the earlier run go away, and the steps of the new run count from 1.
 
@@ -158,7 +158,7 @@ The program has all the rights of your user: it can read and write files, use th
 | `nimblescape.mindbug.showUninitialized` | `false` | Show the variables whose line has not run yet, as "uninitialized": a `let`, `const` or `class` before its line. The switch **Show uninitialized** of the view changes it. |
 | `nimblescape.mindbug.showScopeFrames` | `true` | Draw the block scopes: a colored part in the view, and a rectangle with the same color in the editor around each block scope of the line where the program is. The switch **Show scope frames** of the view changes it. |
 | `nimblescape.mindbug.maxHistorySteps` | `500` | Number of steps that the view keeps for the step history (1 to 5000). |
-| `nimblescape.mindbug.maxObjects` | `300` | Number of heap objects that are read per scope (10 to 5000). |
+| `nimblescape.mindbug.maxObjects` | `300` | Number of heap objects that are read per step, for all scopes together (10 to 5000). |
 | `nimblescape.mindbug.maxArrayItems` | `100` | Number of array items, set members and map entries that are shown per object (5 to 2000). |
 | `nimblescape.mindbug.maxStringLength` | `200` | Number of characters that are shown per string (10 to 10000). |
 
@@ -178,7 +178,7 @@ The folder [examples](../examples) has nine small programs:
 - [inner-functions.ts](../examples/inner-functions.ts): an outer function and an inner function. The inner function addLine is declared inside the outer function receipt. In a call of addLine, its scope is on top of the scope of receipt, and its box shows its own variables and, below the line "from the enclosing scope", the variables of receipt that it uses: taxRate and lines. They are the same variables as in the box of receipt, so lines in both boxes points to the same array.
 - [closures.ts](../examples/closures.ts): closures. The outer function makeCounter returns its inner function next without calling it. In a later call of next, makeCounter is not on the stack any more, but the box of next still shows the variables prefix and count of the call of makeCounter that made it. The two counters ticketsA and ticketsB each have their own count. With the switch **Show functions**, the view also shows the two function objects on the heap.
 
-![Four scopes on the stack, lineTotal on top of makeBill, checkout and the Global scope; the Discount object of lineTotal above the Bill object of makeBill and the objects of the Global scope](https://raw.githubusercontent.com/nimblescape/nimblescape-mindbug/main/docs/images/call-stack.png)
+![Four scopes on the stack, lineTotal on top of makeBill, checkout and the Global scope; the Discount object of lineTotal above the Bill object of makeBill and the objects of the Global scope](https://raw.githubusercontent.com/nimblescape/mindbug-vscode/main/docs/images/call-stack.png)
 
 ## Known limits
 
@@ -186,7 +186,7 @@ The folder [examples](../examples) has nine small programs:
 - **Getters** are shown as `get`, not with their value, because calling a getter runs code of the program.
 - **A `Proxy`** runs the traps of its handler when the helper reads it: there is no way to read a proxy without them.
 - **`await`**: after an `await`, the function calls before it are no longer on the stack, so the view shows only the scopes up to the first `await`.
-- **Large programs**: the view reads at most `nimblescape.mindbug.maxObjects` objects per scope; an object after that shows "… not loaded". It shows at most `nimblescape.mindbug.maxArrayItems` items of an array, a set or a map, and at most `nimblescape.mindbug.maxStringLength` characters of a string.
+- **Large programs**: the view reads at most `nimblescape.mindbug.maxObjects` objects per step; an object after that shows "… not loaded". It reads the objects of the variables first, and then the objects that they point to, the newest function call first. It shows at most `nimblescape.mindbug.maxArrayItems` items of an array, a set or a map, and at most `nimblescape.mindbug.maxStringLength` characters of a string.
 - **Other languages**: the view follows only the JavaScript debugger for Node.js. It shows nothing for a program in a browser, or for other debuggers such as Python.
 - **Node.js 22 and the set-up of fields**: when the program pauses in the scope "(set up fields)" of a class that also has a static variable, Node.js 22 stops with a fatal error of V8 as soon as the debugger runs code there. Mindbug runs no code in that scope, but the debugger of VS Code can, for example for a watch expression or when you move the mouse over a variable in the editor. Node.js 24 does not have this fault.
 - **Node.js and breakpoints**: with Node.js, the program can miss the pause at its first line and pause first at a breakpoint. This happens when the line number of a breakpoint equals the line of the first statement in the JavaScript that Node.js runs for the TypeScript file, because of a fault of the JavaScript debugger of VS Code. Move the breakpoint to another line, or set it after the program has paused at its first line.
