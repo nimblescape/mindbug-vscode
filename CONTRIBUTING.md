@@ -137,8 +137,8 @@ The organization `nimblescape` is the namespace of the repository, as the
 scope `@nimblescape` is the namespace of an npm package, so the name of the
 repository does not repeat `nimblescape`. The suffix `-vscode` says that the
 repository holds a VS Code extension. When the `name` ends with a number
-`-<n>`, the name of the repository ends with the same number: the `name`
-`nimblescape-devspaces-2` has the repository `devspaces-vscode-2`.
+`-<n>`, the name of the repository leaves the number out: the `name`
+`nimblescape-<name>-<n>` has the repository `<name>-vscode`.
 
 The prefix `nimblescape-` keeps the `name` apart from the names of other
 publishers, because the Marketplace accepts a `name` only once. The
