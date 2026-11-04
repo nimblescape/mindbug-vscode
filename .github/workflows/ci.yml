@@ -12,11 +12,10 @@
 # with vsce, which also validates the manifest and the README. The VSIX and the
 # screenshots stay workflow artifacts for inspection.
 # This workflow publishes nothing: the release workflow calls it for the commit
-# of a version and publishes the VSIX of that call. A change of this file
-# changes the release process: its pull request needs a dry run (rule 4). The
-# workflow "VS Code versions" calls it once per week with another VS Code
-# version; such a call runs only the type check, ESLint, the unit tests, the
-# tests in VS Code and the package.
+# of a version and publishes the VSIX of that call. The workflow "VS Code
+# versions" calls it once per week with another VS Code version; such a call
+# runs only the type check, ESLint, the unit tests, the tests in VS Code and the
+# package.
 
 name: CI
 
