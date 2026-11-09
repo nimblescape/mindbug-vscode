@@ -3,7 +3,7 @@
 Each section lists the changes of one released version. The release workflow
 takes the section of a version as the notes of its GitHub release.
 
-## 0.2.2
+## 0.3.0
 
 **Array history.** The new switch **Show array history** of the Mindbug
 view shows the earlier states of each array below it, for example the
