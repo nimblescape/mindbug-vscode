@@ -14,6 +14,16 @@ the number of the step is at the right of the row. A click on a row shows
 that step. The switch is off by default, and the setting
 `nimblescape.mindbug.showArrayHistory` keeps it.
 
+**Run with Mindbug directly on Windows.** On Windows without WSL, the
+button **Run with Mindbug** and a launch configuration of type `mindbug`
+started no program: the debug session waited, and the program did not
+pause at its first line. The cause was in the extension nimblescape
+TypeScript, which starts the programs of Mindbug with its debug type `ts`:
+up to its version 0.3.1, the debug type started `ts` with a shell script,
+which Windows cannot run. nimblescape TypeScript 0.3.2 starts the batch
+file `ts.cmd` on Windows. Mindbug needs no change for this; update
+nimblescape TypeScript to 0.3.2 or newer to use Mindbug on Windows.
+
 ## 0.2.1
 
 **Faster steps in a deep call stack.** Mindbug now reads the objects of
