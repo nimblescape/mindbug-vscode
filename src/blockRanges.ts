@@ -10,7 +10,7 @@
 // `const` or `class`) is skipped, and the body of the function ends the search.
 // This file does not import 'vscode'.
 
-import { skipSpaceBack, wordBefore } from './blockKind.ts';
+import { ScriptText, skipSpaceBack, wordBefore } from './blockKind.ts';
 import { BLOCK_COLORS, type BlockKind } from './model.ts';
 
 /** A pair of brackets in the code: the offsets of the opening and of the closing bracket. */
@@ -260,12 +260,11 @@ export function blockMarks(
   pairs: BracketPair[] = bracketPairs(text),
   tabSize = 4,
 ): BlockMark[] {
+  // A file with Windows line ends (CRLF) has a `\r` before each `\n`: the line of an offset counts it, and the columns
+  // of a line do not.
+  const script = new ScriptText(text);
   const lines = text.split('\n').map((l) => l.replace(/\r$/, ''));
-  const lineOf = (offset: number) => {
-    let line = 0;
-    for (let at = 0; line < lines.length - 1 && at + lines[line].length < offset; line++) at += lines[line].length + 1;
-    return line;
-  };
+  const lineOf = (offset: number) => script.line(offset);
   const columns = (s: string) => {
     let c = 0;
     for (const ch of s) c = ch === '\t' ? c + tabSize - (c % tabSize) : c + 1;

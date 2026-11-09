@@ -320,6 +320,8 @@ async function blocks(api: MindbugApi, start: Start): Promise<void> {
   );
   // The switch "Show scope frames" turns the rectangles off and on again, and saves its setting.
   const config = () => vscode.workspace.getConfiguration('nimblescape.mindbug');
+  const editor = vscode.window.visibleTextEditors.find((e) => e.document.uri.fsPath === file);
+  assert.ok(editor, 'an editor shows blocks.ts');
   try {
     await api.saveViewOption('showScopeFrames', false);
     assert.deepEqual(api.blockMarks(file), [], 'no rectangles while the switch is off');
@@ -327,8 +329,20 @@ async function blocks(api: MindbugApi, start: Start): Promise<void> {
     await api.saveViewOption('showScopeFrames', true);
     assert.equal(api.blockMarks(file).length, 4, 'the rectangles are back when the switch is on');
     assert.equal(config().inspect('showScopeFrames')?.globalValue, undefined, 'the default removes the user setting');
+    // A file with Windows line ends (CRLF), as Git for Windows checks files out, gets the same rectangles. The editor
+    // changes the line ends of the file (not the file on the disk), and the switch draws the rectangles again.
+    const marks = api.blockMarks(file);
+    assert.ok(await editor.edit((b) => b.setEndOfLine(vscode.EndOfLine.CRLF)), 'the editor changes the line ends');
+    assert.ok(editor.document.getText().includes('\r\n'), 'the text has Windows line ends');
+    await api.saveViewOption('showScopeFrames', false);
+    await api.saveViewOption('showScopeFrames', true);
+    assert.deepEqual(api.blockMarks(file), marks, 'the same rectangles with Windows line ends');
   } finally {
     await config().update('showScopeFrames', undefined, vscode.ConfigurationTarget.Global);
+    if (editor.document.isDirty) {
+      await vscode.window.showTextDocument(editor.document, { viewColumn: editor.viewColumn });
+      await vscode.commands.executeCommand('workbench.action.files.revert');
+    }
   }
   await stop();
   assert.deepEqual(api.blockMarks(file), [], 'the marks go away when the program ends');

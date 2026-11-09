@@ -27,6 +27,21 @@ export class ScriptText {
     const offset = start + column;
     return offset <= this.text.length ? offset : undefined;
   }
+
+  /**
+   * The line (from 0) of an offset in the text. A line ends with its `\n`, so the `\r` of a Windows line end (CRLF)
+   * belongs to its line.
+   */
+  line(offset: number): number {
+    let low = 0;
+    let high = this.starts.length - 1;
+    while (low < high) {
+      const middle = (low + high + 1) >> 1;
+      if (this.starts[middle] <= offset) low = middle;
+      else high = middle - 1;
+    }
+    return low;
+  }
 }
 
 /** How far back the search for the `(` of a statement goes, so that a long text costs no time. */

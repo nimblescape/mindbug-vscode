@@ -163,3 +163,31 @@ test('the CSS of the rectangles: the sides on each line, the top on the first li
   ]);
   assert.ok(same.find((l) => l.line === 0 && l.css.includes('blockScope2'))!.css.includes('top: 4px'));
 });
+
+test('a file with Windows line ends (CRLF) gets the same rectangles', () => {
+  // VS Code gives the text of such a file with `\r\n` at the end of each line, and the offsets count the `\r`. Before
+  // the fix, each `\r` moved the rectangles further down: in insertion-sort.ts, the rectangle of the for loop ended
+  // three lines below its `}`.
+  const crlf = (text: string) => text.replace(/\r?\n/g, '\r\n');
+  const sort = readFileSync(join(import.meta.dirname, '../../examples/insertion-sort.ts'), 'utf8');
+  const cases: [string, number, number, BlockKind[]][] = [
+    [BLOCKS, 30, 7, ['block', 'for', 'for body', 'if']],
+    // In the while loop of insertionSort, and in the header of its for loop.
+    [sort, 15, 7, ['for', 'for body']],
+    [sort, 9, 28, ['for']],
+  ];
+  for (const [text, line, column, blocks] of cases) {
+    const marks = (t: string) => blockMarks(t, blockRanges(t, offsetAt(t, line, column), blocks)!);
+    assert.deepEqual(marks(crlf(text)), marks(text), `line ${line}`);
+    assert.deepEqual(blockMarkLines(marks(crlf(text))), blockMarkLines(marks(text)), `line ${line}`);
+  }
+  // The for loop of insertionSort is lines 9 to 20 (from 1), its body lines 10 to 19.
+  const lf = blockMarks(sort, blockRanges(sort, offsetAt(sort, 15, 7), ['for', 'for body'])!);
+  assert.deepEqual(
+    lf.map((m) => [m.kind, m.first + 1, m.last + 1, m.indent]),
+    [
+      ['for', 9, 20, 2],
+      ['for body', 10, 19, 4],
+    ],
+  );
+});

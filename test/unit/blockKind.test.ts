@@ -64,4 +64,8 @@ test('the text and the positions of a script', () => {
   assert.equal(script.text.slice(script.offset(2, 2)), 'let b = 2;\n}\n');
   assert.equal(script.offset(9, 0), undefined);
   assert.equal(script.offset(0, 99), undefined);
+  // The line of an offset: the `\n` at the end of a line belongs to it, and so does the `\r` of a Windows line end.
+  assert.deepEqual([0, 9, 10, 11, 12, 13, 99].map((offset) => script.line(offset)), [0, 0, 0, 1, 1, 2, 4]);
+  const crlf = new ScriptText('a;\r\n{\r\n}\r\n');
+  assert.deepEqual([0, 2, 3, 4, 5, 7, 9, 10].map((offset) => crlf.line(offset)), [0, 0, 0, 1, 1, 2, 2, 3]);
 });
