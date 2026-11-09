@@ -10,6 +10,7 @@ import { blockMarkLines, blockMarks, blockRanges, bracketPairs, type BlockMark, 
 import {
   DEFAULT_VIEW_OPTIONS,
   stepMarkText,
+  switchTarget,
   VIEW_OPTION_NAMES,
   type Frame,
   type FromWebview,
@@ -105,9 +106,12 @@ export class MemoryController implements vscode.Disposable {
   /**
    * Clicks on switches that the settings of the workspace set. Mindbug does not change the settings of a workspace,
    * which are a file of the workspace (`.vscode/settings.json`), so these clicks last only until the view closes or
-   * the setting changes.
+   * the setting changes. The same for a click on a switch whose setting VS Code does not know yet (see
+   * `switchTarget`).
    */
   private viewOverrides: Partial<ViewOptions> = {};
+  /** True after the message that the window must reload, so that it comes only once. */
+  private reloadAsked = false;
   /** The switches that the view shows: from the opening of the panel, the clicks, and the messages `viewOptions`. */
   private shownOptions: ViewOptions = { ...DEFAULT_VIEW_OPTIONS };
   /** Resolvers waiting for the next snapshot (used by tests). */
@@ -261,7 +265,7 @@ export class MemoryController implements vscode.Disposable {
     const opts = { ...DEFAULT_VIEW_OPTIONS };
     for (const name of VIEW_OPTION_NAMES) {
       const override = this.viewOverrides[name];
-      const value = override !== undefined && config.inspect(name)?.workspaceValue !== undefined ? override : config.get<unknown>(name);
+      const value = override !== undefined && switchTarget(config.inspect(name)) !== 'user' ? override : config.get<unknown>(name);
       if (typeof value === 'boolean') opts[name] = value;
     }
     return opts;
@@ -307,8 +311,10 @@ export class MemoryController implements vscode.Disposable {
   private async writeViewOption(name: keyof ViewOptions, value: boolean): Promise<void> {
     const config = () => vscode.workspace.getConfiguration('nimblescape.mindbug');
     try {
-      if (config().inspect(name)?.workspaceValue !== undefined) {
+      const target = switchTarget(config().inspect(name));
+      if (target !== 'user') {
         if (this.panel) this.viewOverrides[name] = value;
+        if (target === 'unregistered') this.askReload(name);
         return;
       }
       delete this.viewOverrides[name];
@@ -320,6 +326,22 @@ export class MemoryController implements vscode.Disposable {
       const message = error instanceof Error ? error.message : String(error);
       void vscode.window.showWarningMessage(`Mindbug could not save the setting nimblescape.mindbug.${name}: ${message}`);
     }
+  }
+
+  /**
+   * The message for a switch whose setting VS Code does not know: VS Code updated Mindbug without a reload of the
+   * window, and it loads the settings of an updated extension only when the window reloads.
+   */
+  private askReload(name: keyof ViewOptions): void {
+    if (this.reloadAsked) return;
+    this.reloadAsked = true;
+    const reload = 'Reload Window';
+    void vscode.window
+      .showWarningMessage(
+        `Mindbug cannot save the setting nimblescape.mindbug.${name} yet. VS Code updated Mindbug, but it loads the new settings of an extension only when the window reloads. The switch works in the view until you close it. Reload the window to finish the update.`,
+        reload,
+      )
+      .then((choice) => (choice === reload ? vscode.commands.executeCommand('workbench.action.reloadWindow') : undefined));
   }
 
   /**

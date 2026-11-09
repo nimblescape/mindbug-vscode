@@ -12,7 +12,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { MindbugApi } from '../../src/extension.ts';
-import type { MemorySnapshot, Value } from '../../src/model.ts';
+import { switchTarget, VIEW_OPTION_NAMES, type MemorySnapshot, type Value } from '../../src/model.ts';
 
 const TIMEOUT = 60000;
 
@@ -1022,6 +1022,14 @@ describe('the Mindbug view in VS Code', () => {
         await config().update(name, undefined, vscode.ConfigurationTarget.Global);
       }
     }
+  });
+
+  it('knows a setting of a switch by its default, which a setting that VS Code does not know lacks', () => {
+    // The controller takes a setting without a default as a setting that VS Code has not registered yet, as after an
+    // update of Mindbug without a reload of the window (switchTarget in src/model.ts).
+    const config = vscode.workspace.getConfiguration('nimblescape.mindbug');
+    for (const name of VIEW_OPTION_NAMES) assert.equal(switchTarget(config.inspect(name)), 'user', name);
+    assert.equal(switchTarget(config.inspect('noSuchSetting')), 'unregistered');
   });
 
   it('saves the clicks on the switches in their order, so that the last click wins', async () => {

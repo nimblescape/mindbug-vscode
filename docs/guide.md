@@ -217,6 +217,7 @@ The folder [examples](../examples) has nine small programs:
 | The view does not open | Run **Open Mindbug** while the program is paused, or turn on `nimblescape.mindbug.openAutomatically`. |
 | The view says "The memory could not be read" | The debugger or V8 did not answer a request of Mindbug. Step once more; when the message stays, report it (see [Support](../SUPPORT.md)) with a small program and the text of the message. |
 | **Run with Mindbug** is missing | The button shows only in a TypeScript editor while no program runs. Check that the workspace is trusted. |
+| After an update of Mindbug, a click on a new switch says "Mindbug cannot save the setting … yet" | VS Code updated Mindbug and restarted the extensions, but it loads the new settings of an extension only when the window reloads. Select **Reload Window** in the message, or run **Developer: Reload Window**. Until then, the switch works in the view until you close it. |
 
 ## Uninstall
 

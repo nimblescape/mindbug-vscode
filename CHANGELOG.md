@@ -3,6 +3,18 @@
 Each section lists the changes of one released version. The release workflow
 takes the section of a version as the notes of its GitHub release.
 
+## 0.3.1
+
+**A new switch after an update without a reload.** When VS Code updated
+Mindbug and restarted the extensions without a reload of the window, a
+click on a switch that the update added, such as **Show array history**,
+gave the message "Unable to write to User Settings because
+nimblescape.mindbug.showArrayHistory is not a registered configuration",
+and the switch went back. VS Code loads the settings of an updated
+extension only when the window reloads. Now the switch works in the view
+until you close it, and Mindbug says once that the window must reload to
+finish the update, with the button **Reload Window**.
+
 ## 0.3.0
 
 **Array history.** The new switch **Show array history** of the Mindbug
