@@ -78,7 +78,7 @@ The page shows names and values of the debugged program, so the extension treats
 
 - `ready`, when the page has loaded.
 - `viewStep` and `openLocation`, which carry only the number of a step and of a frame of that step, never a file. The extension takes the file and the line from its own step history and opens that file as a text document; it runs nothing. A step or a frame that the history does not have opens nothing, so the page cannot open any other file.
-- `viewOption`, which carries the name and the value of a switch of the view after a click. The extension saves only the values `true` and `false` of the six user settings of the switches (`nimblescape.mindbug.showClasses`, `showFunctions`, `showIds`, `showUninitialized`, `showScopeFrames` and `stopOnEntry`), and ignores any other name or value.
+- `viewOption`, which carries the name and the value of a switch of the view after a click. The extension saves only the values `true` and `false` of the seven user settings of the switches (`nimblescape.mindbug.showClasses`, `showFunctions`, `showIds`, `showUninitialized`, `showScopeFrames`, `showArrayHistory` and `stopOnEntry`), and ignores any other name or value.
 
 ## Stored data
 

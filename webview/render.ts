@@ -8,6 +8,7 @@
 import { BLOCK_COLORS, type BlockKind, type ChangeSet, type Frame, type HeapObject, type MemorySnapshot, type Value } from '../src/model.ts';
 import { slotKey, varKey } from '../src/changes.ts';
 import { isHiddenRef, layoutHeap, varsBottomUp, type HeapTree, type ViewOptions } from './layout.ts';
+import { earlierStates, type ArrayState } from './arrayHistory.ts';
 
 export interface RenderInput {
   snap: MemorySnapshot;
@@ -17,6 +18,8 @@ export interface RenderInput {
   focusFrameId?: number;
   /** False when the panel shows an earlier step of the history. */
   live?: boolean;
+  /** The steps of the step history up to the shown step, for the array history. */
+  steps?: readonly MemorySnapshot[];
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string): HTMLElementTagNameMap[K] {
@@ -226,6 +229,7 @@ function renderArray(o: HeapObject, input: RenderInput): HTMLElement {
   const tag = idTag(o, opts);
   if (tag) label.append(tag);
   box.append(label);
+  const history = opts.showArrayHistory && input.steps ? earlierStates(input.steps, o.id) : undefined;
   const cells = el('div', 'cells');
   (o.items ?? []).forEach((v, i) => {
     const c = el('div', `cell${slotClass(o.id, String(i), changes)}`);
@@ -238,7 +242,62 @@ function renderArray(o: HeapObject, input: RenderInput): HTMLElement {
   if ((o.items ?? []).length === 0) cells.append(el('div', 'cell empty-cells', 'empty'));
   if (o.more) cells.append(el('div', 'cell more', `… ${o.more} more`));
   box.append(cells);
+  if (history && history.states.length > 0) addArrayHistory(box, cells, o, history.states, history.hidden);
   return box;
+}
+
+/** The text of a value in a row of the array history: a reference is the id of its object, as there is no arrow. */
+function stateText(v: Value): string {
+  return v.k === 'ref' ? `id ${v.id}` : valueText(v);
+}
+
+/**
+ * The earlier states of an array, below its cells: one row for each state, the newest at the top, with the number of
+ * its step at the right. The cells of the array and of the rows are in one grid, so the cells of one index are in one
+ * column. A click on a row shows its step (`data-step`).
+ */
+function addArrayHistory(box: HTMLElement, cells: HTMLElement, o: HeapObject, states: ArrayState[], hidden: number): void {
+  const columns = Math.max(o.items?.length ?? 0, ...states.map((s) => s.items.length), 1);
+  const more = !!o.more || states.some((s) => s.more > 0);
+  box.classList.add('with-history');
+  cells.classList.add('history-grid');
+  cells.style.gridTemplateColumns = `repeat(${columns + (more ? 1 : 0)}, minmax(44px, max-content)) max-content`;
+  // The current cells take the first row. The caption spans all columns, so it starts the next row.
+  const caption = el('div', 'history-caption', 'earlier states, the newest at the top');
+  caption.title =
+    'The values of this array at earlier steps: one row for each step that changed the array. The colored cells are the cells that this step changed. Click a row to show its step.';
+  caption.style.gridColumn = '1 / -1';
+  cells.append(caption);
+
+  for (const s of states) {
+    const row = el('div', 'history-row');
+    row.dataset.step = String(s.step);
+    row.title = `Step ${s.step}${s.line ? `, line ${s.line}` : ''}: click to show this step`;
+    s.items.forEach((v, i) => {
+      const c = el('div', `hcell${s.changed.has(i) ? ' changed' : ''}${v.k === 'ref' ? ' ref' : ''}`, stateText(v));
+      c.style.gridColumn = String(i + 1);
+      row.append(c);
+    });
+    if (s.items.length === 0) {
+      const c = el('div', 'hcell empty-cells', 'empty');
+      c.style.gridColumn = '1';
+      row.append(c);
+    }
+    if (s.more > 0) {
+      const c = el('div', 'hcell more', '…');
+      c.style.gridColumn = String(columns + 1);
+      row.append(c);
+    }
+    const step = el('div', 'hstep', `step ${s.step}`);
+    step.style.gridColumn = '-2';
+    row.append(step);
+    cells.append(row);
+  }
+  if (hidden > 0) {
+    const line = el('div', 'history-more', `… ${hidden} older ${hidden === 1 ? 'state' : 'states'}`);
+    line.style.gridColumn = '1 / -1';
+    cells.append(line);
+  }
 }
 
 function renderSet(o: HeapObject, input: RenderInput): HTMLElement {

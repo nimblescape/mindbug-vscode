@@ -244,6 +244,55 @@ async function main(): Promise<void> {
       await page.click('#showScopeFrames');
       if ((await page.$$eval('.frame .block', (els) => els.length)) !== 4) throw new Error('the parts are not back with the switch on');
 
+      // 8. The array history: insertion sort after -4 is in its place (step 49). With the switch "Show array history"
+      //    on, the ten earlier states of arr are below it, the newest at the top, and the cells of one index are in one
+      //    column. arr1 has no row: it never changed.
+      const afterMinus4 = sort.findIndex((s) => s.step === 49);
+      await send(page, { type: 'history', snapshots: sort.slice(0, afterMinus4 + 1), sessionId: 'sort-history' });
+      await page.click('#showArrayHistory');
+      const rows = await page.$$eval('.obj[data-id="3"] .history-row', (els) =>
+        els.map((r) => `${(r as HTMLElement).dataset.step}:${[...r.querySelectorAll('.hcell')].map((c) => (c.classList.contains('changed') ? `*${c.textContent}` : c.textContent)).join(' ')}`),
+      );
+      const expected = [
+        '46:1 *1 3 5 7 6 4 2',
+        '43:1 3 *3 5 7 6 4 2',
+        '40:1 3 5 *5 7 6 4 2',
+        '37:1 3 5 7 *7 6 4 2',
+        '31:1 3 *5 7 -4 6 4 2',
+        '28:1 3 7 *7 -4 6 4 2',
+        '22:*1 3 7 5 -4 6 4 2',
+        '19:3 *3 7 5 -4 6 4 2',
+        '16:3 7 *7 5 -4 6 4 2',
+        '3:3 7 1 5 -4 6 4 2',
+      ];
+      if (rows.join('|') !== expected.join('|')) throw new Error(`rows of the array history:\n${rows.join('\n')}`);
+      if ((await page.$$eval('.obj[data-id="2"] .history-row', (els) => els.length)) !== 0) throw new Error('arr1 has rows');
+      const columns = await page.$$eval('.obj[data-id="3"] .history-grid', ([grid]) => {
+        const left = (e: Element) => Math.round(e.getBoundingClientRect().left);
+        const cells = [...grid.querySelectorAll(':scope > .cell')].map(left);
+        const rows = [...grid.querySelectorAll('.history-row')].map((r) => [...r.querySelectorAll('.hcell')].map(left));
+        return rows.every((r) => r.join() === cells.join());
+      });
+      if (!columns) throw new Error('the cells of the array history are not in the columns of the array');
+      await checkArrows(page, `array history ${theme}`);
+      if (!(await page.isVisible('.legend-array-history'))) throw new Error('no legend for the array history');
+      const historyOption = (await page.evaluate(() => (window as unknown as { __sent: FromWebview[] }).__sent)).filter((m) => m.type === 'viewOption').pop();
+      if (historyOption?.name !== 'showArrayHistory' || historyOption.value !== true) throw new Error(`viewOption message: ${JSON.stringify(historyOption)}`);
+      await shot('array-history');
+
+      //    A click on a row shows its step; the rows are then the states before that step.
+      await page.click('.obj[data-id="3"] .history-row[data-step="22"] .hstep');
+      const rowStepText = await page.textContent('#stepText');
+      if (rowStepText !== 'Step 22 of 49') throw new Error(`step text after a click on a row: ${rowStepText}`);
+      const pastRows = await page.$$eval('.obj[data-id="3"] .history-row', (els) => els.map((r) => (r as HTMLElement).dataset.step));
+      if (pastRows.join(',') !== '19,16,3') throw new Error(`rows at step 22: ${pastRows.join(',')}`);
+      await shot('array-history-past');
+
+      //    The switch off: no rows.
+      await page.click('#showArrayHistory');
+      if ((await page.$$eval('.history-row', (els) => els.length)) !== 0) throw new Error('rows with the switch off');
+      if (await page.isVisible('.legend-array-history')) throw new Error('legend of the array history with the switch off');
+
       if (errors.length > 0) throw new Error(`page errors in ${theme}:\n${errors.join('\n')}`);
       await page.close();
     }

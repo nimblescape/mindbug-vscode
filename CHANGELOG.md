@@ -3,6 +3,17 @@
 Each section lists the changes of one released version. The release workflow
 takes the section of a version as the notes of its GitHub release.
 
+## 0.2.2
+
+**Array history.** The new switch **Show array history** of the Mindbug
+view shows the earlier states of each array below it, for example the
+states of the array in the loop of a sort algorithm. Each row is the array
+at an earlier step that changed it, the newest at the top. The cells of one
+index are in one column, the cells that the step changed are yellow, and
+the number of the step is at the right of the row. A click on a row shows
+that step. The switch is off by default, and the setting
+`nimblescape.mindbug.showArrayHistory` keeps it.
+
 ## 0.2.1
 
 **Faster steps in a deep call stack.** Mindbug now reads the objects of

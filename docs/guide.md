@@ -77,6 +77,7 @@ Everything that changed in the last step has a yellow background: a new or chang
 | **Show ids** | Shows the number of each object, which stays the same from step to step. |
 | **Show uninitialized** | Shows the variables whose line has not run yet: a `let`, `const` or `class` before its line, as "uninitialized". When it is off, such a variable appears at the step where its line runs. |
 | **Show scope frames** | Draws the block scopes: a colored part in the box of their scope, and a rectangle with the same color around their lines in the editor (see [Stack](#stack)). When it is off, the variables of the blocks are in the box of their scope, the innermost block at the top, and the editor has no rectangles. Two variables with the same name are then both in the box, as in `let a = 10; { let a = 200; }`. |
+| **Show array history** | Shows the earlier states of each array below it, one row for each earlier step that changed the array (see [Array history](#array-history)). |
 | **Stop on entry** | Pauses at the first line of the program at the next start with **Run with Mindbug** or a launch configuration of type `mindbug`, so that you can step from the start. When it is off, the program runs until a breakpoint. It changes nothing in the view. |
 
 Each switch is a setting (see [Settings](#settings)). A click on a switch changes its setting, so the view has the switches again after you close it and after a restart of VS Code. When the settings of a workspace set a switch, they decide: a click on that switch changes the view only until you close it, because Mindbug does not change the settings of a workspace, a file of the workspace (`.vscode/settings.json`).
@@ -94,6 +95,20 @@ The editor shows the line where the program was at that step, also when that lin
 The view keeps the steps of the newest debug session, at most `nimblescape.mindbug.maxHistorySteps` steps; then the oldest steps go away. A new debug session starts a new history, and so does **Restart** (Ctrl+Shift+F5) of the debugger: the steps of the earlier run go away, and the steps of the new run count from 1.
 
 Mindbug reads the memory only while the view is open. When you close the view, the pauses after that are not steps, and Mindbug sends no request to the program. When you open the view again (**Open Mindbug**), it reads the current pause as the next step, and the steps from before stay in the history.
+
+### Array history
+
+With the switch **Show array history**, each array that changed shows its earlier states below its cells, for example the states of the array in the loop of a sort algorithm:
+
+- Each row is the array at an earlier step that changed it. The newest state is at the top, directly below the array, and the oldest state is at the bottom, as the stack builds bottom up.
+- The cells of one index are in one column, below the cell of the array with that index. The cells that the step of a row changed have a yellow background.
+- The number of the step of each row is at its right. A click on a row shows that step. At an earlier step, the rows are the states before that step.
+- An array that did not change has no rows. A cell that holds an object shows the id of the object, because a row has no arrows.
+- An array shows at most 100 earlier states; a line below them gives the number of the older states.
+
+What one row is depends on how you pause the program. With **Step Over** (F10), each change of the array is a row: in [insertion-sort.ts](../examples/insertion-sort.ts), each value that moves one place to the right. With a breakpoint at the first line in the loop and **Continue** (F5), each turn of the loop that changes the array is one row, because the step history keeps only the pauses.
+
+![The array history of insertion sort: below the array, ten earlier states, one for each step that changed the array, with the changed cell of each row in yellow](https://raw.githubusercontent.com/nimblescape/mindbug-vscode/main/docs/images/array-history.png)
 
 ## Commands
 
@@ -157,6 +172,7 @@ The program has all the rights of your user: it can read and write files, use th
 | `nimblescape.mindbug.showIds` | `true` | Show the number of each object. The switch **Show ids** of the view changes it. |
 | `nimblescape.mindbug.showUninitialized` | `false` | Show the variables whose line has not run yet, as "uninitialized": a `let`, `const` or `class` before its line. The switch **Show uninitialized** of the view changes it. |
 | `nimblescape.mindbug.showScopeFrames` | `true` | Draw the block scopes: a colored part in the view, and a rectangle with the same color in the editor around each block scope of the line where the program is. The switch **Show scope frames** of the view changes it. |
+| `nimblescape.mindbug.showArrayHistory` | `false` | Show the earlier states of each array below it: one row for each earlier step that changed the array, the newest at the top. The switch **Show array history** of the view changes it. |
 | `nimblescape.mindbug.maxHistorySteps` | `500` | Number of steps that the view keeps for the step history (1 to 5000). |
 | `nimblescape.mindbug.maxObjects` | `300` | Number of heap objects that are read per step, for all scopes together (10 to 5000). |
 | `nimblescape.mindbug.maxArrayItems` | `100` | Number of array items, set members and map entries that are shown per object (5 to 2000). |
@@ -169,7 +185,7 @@ A higher limit shows more of a large program, and makes each step slower, becaus
 The folder [examples](../examples) has nine small programs:
 
 - [return-object.ts](../examples/return-object.ts): a function creates one object and returns it. The call adds a scope with the parameters title and pages to the stack. The object stays on the heap after the return, because the variable myBook of the Global scope points to it, and it goes away when myBook is set to `null`. The animation at the top of the [README](../README.md) steps through this example.
-- [insertion-sort.ts](../examples/insertion-sort.ts): two variables point to the same array, and the function changes the array on the heap.
+- [insertion-sort.ts](../examples/insertion-sort.ts): two variables point to the same array, and the function changes the array on the heap. Turn on the switch **Show array history** to see each earlier state of the array (see [Array history](#array-history)).
 - [people.ts](../examples/people.ts): classes, a static variable, constructors, a subclass and methods.
 - [linked-list.ts](../examples/linked-list.ts): objects that point to each other.
 - [call-stack.ts](../examples/call-stack.ts): three functions on the stack at the same time, with objects of the classes Item, Discount and Bill. The Discount object that the inner function creates does not survive its call; the Bill object that the middle function creates survives the call of the inner function and is still there in the Global scope at the end.

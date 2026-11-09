@@ -136,6 +136,11 @@
           "default": true,
           "markdownDescription": "Draw each block scope as a colored part in the box of its scope in the Mindbug view and, while the program is paused, as a rectangle with the same color around its lines in the editor. When it is off, the variables of the blocks are in the box of their scope, and the editor has no rectangles. A click on the switch **Show scope frames** of the view changes this setting in the user settings, unless the settings of the workspace set it."
         },
+        "nimblescape.mindbug.showArrayHistory": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Show the earlier states of each array below it in the Mindbug view: one row for each earlier step that changed the array, the newest at the top, for example the states of the array in the loop of a sort algorithm. A click on a row shows its step. A click on the switch **Show array history** of the view changes this setting in the user settings, unless the settings of the workspace set it."
+        },
         "nimblescape.mindbug.maxHistorySteps": {
           "type": "number",
           "default": 500,

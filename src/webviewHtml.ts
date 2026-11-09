@@ -42,6 +42,7 @@ export function webviewHtml(o: WebviewHtmlInput): string {
   <label class="toggle"><input type="checkbox" id="showIds"> Show ids</label>
   <label class="toggle" title="Show the variables whose line has not run yet: a let, const or class before its line"><input type="checkbox" id="showUninitialized"> Show uninitialized</label>
   <label class="toggle" title="Draw each block scope as a colored part in this view, and as a rectangle with the same color around its lines in the editor"><input type="checkbox" id="showScopeFrames"> Show scope frames</label>
+  <label class="toggle" title="Show the earlier states of each array below it: one row for each step that changed the array, the newest at the top"><input type="checkbox" id="showArrayHistory"> Show array history</label>
   <label class="toggle" title="Pause at the first line of the program at the next start with Run with Mindbug or a launch configuration of type mindbug"><input type="checkbox" id="stopOnEntry"> Stop on entry</label>
 </header>
 <nav id="history" class="history" aria-label="Step history" hidden>
@@ -98,6 +99,7 @@ export function webviewHtml(o: WebviewHtmlInput): string {
   </span>
   <span class="legend-item legend-classes"><span class="static">count</span>Underlined: static, one value for the whole class</span>
   <span class="legend-item"><span class="swatch changed-swatch"></span>Changed in the last step</span>
+  <span class="legend-item legend-array-history"><span class="swatch history-swatch"></span>An earlier state of an array (click it to show its step)</span>
   <span class="legend-item">
     <svg class="lg-runs" width="10" height="14" viewBox="0 0 10 14" aria-hidden="true"><path d="M1 1L9 7L1 13Z"></path></svg>
     The function that runs now

@@ -61,6 +61,7 @@ const showIds = $<HTMLInputElement>('showIds');
 const showClasses = $<HTMLInputElement>('showClasses');
 const showUninitialized = $<HTMLInputElement>('showUninitialized');
 const showScopeFrames = $<HTMLInputElement>('showScopeFrames');
+const showArrayHistory = $<HTMLInputElement>('showArrayHistory');
 const stopOnEntry = $<HTMLInputElement>('stopOnEntry');
 
 function showOptions(): void {
@@ -69,6 +70,7 @@ function showOptions(): void {
   showClasses.checked = state.opts.showClasses;
   showUninitialized.checked = state.opts.showUninitialized;
   showScopeFrames.checked = state.opts.showScopeFrames;
+  showArrayHistory.checked = state.opts.showArrayHistory;
   stopOnEntry.checked = state.opts.stopOnEntry;
 }
 showOptions();
@@ -178,11 +180,13 @@ function render(): void {
     opts: state.opts,
     focusFrameId: live ? state.focusFrameId : undefined,
     live,
+    steps: history.snapshots.slice(0, history.view + 1),
   };
   renderFrames(framesEl, input);
   renderHeap(heapEl, input);
   hovered = null;
   document.body.classList.toggle('has-classes', heapEl.querySelector('.class-box') !== null);
+  document.body.classList.toggle('has-array-history', heapEl.querySelector('.history-row') !== null);
   scheduleArrows();
   reportView();
 }
@@ -288,6 +292,11 @@ showScopeFrames.addEventListener('change', () => {
   saveOption('showScopeFrames');
   render();
 });
+showArrayHistory.addEventListener('change', () => {
+  state.opts = { ...state.opts, showArrayHistory: showArrayHistory.checked };
+  saveOption('showArrayHistory');
+  render();
+});
 // The switch changes the next start of a program, not the view.
 stopOnEntry.addEventListener('change', () => {
   state.opts = { ...state.opts, stopOnEntry: stopOnEntry.checked };
@@ -301,6 +310,14 @@ framesEl.addEventListener('click', (e) => {
   if (title?.dataset.frame && snap) {
     vscode.postMessage({ type: 'openLocation', step: snap.step, frame: Number(title.dataset.frame) });
   }
+});
+
+// A click on a row of the array history shows the step of that row.
+heapEl.addEventListener('click', (e) => {
+  const row = (e.target as HTMLElement).closest<HTMLElement>('.history-row');
+  if (!row?.dataset.step) return;
+  const i = history.snapshots.findIndex((s) => s.step === Number(row.dataset.step));
+  if (i >= 0) showStep(i);
 });
 
 let hovered: HTMLElement | null = null;

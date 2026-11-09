@@ -53,6 +53,9 @@
   --mb-cell-bg: #fff6b8;
   --mb-cell-border: #b5a85a;
   --mb-idx: #6b6b4a;
+  --mb-hist-bg: #fffcea;
+  --mb-hist-border: #d9d0a0;
+  --mb-hist-hover: #eef3fa;
   --mb-uml-bg: #ffffff;
   --mb-uml-border: #3c4652;
   --mb-class-head: #e9eef4;
@@ -117,6 +120,9 @@ body.vscode-dark {
   --mb-cell-bg: #38321d;
   --mb-cell-border: #7d7140;
   --mb-idx: #bdb28a;
+  --mb-hist-bg: #241f12;
+  --mb-hist-border: #5a5232;
+  --mb-hist-hover: #1c2a3d;
   --mb-uml-bg: #1b2028;
   --mb-uml-border: #a9b4c2;
   --mb-class-head: #262e39;
@@ -182,6 +188,9 @@ body.vscode-high-contrast-light {
   --mb-cell-bg: transparent;
   --mb-cell-border: var(--vscode-contrastBorder, #6fc3df);
   --mb-idx: var(--vscode-editor-foreground);
+  --mb-hist-bg: transparent;
+  --mb-hist-border: var(--vscode-contrastBorder, #6fc3df);
+  --mb-hist-hover: transparent;
   --mb-uml-bg: transparent;
   --mb-uml-border: var(--vscode-contrastBorder, #6fc3df);
   --mb-class-head: transparent;
@@ -882,6 +891,82 @@ tr.entry.changed > td {
   white-space: nowrap;
 }
 
+/* The array history: the earlier states of an array below its cells, the newest at the top. The cells of the array
+   and of the rows are in one grid, so that the cells of one index are in one column. */
+
+.cells.history-grid {
+  display: grid;
+  max-width: none;
+}
+
+.history-grid > .cell {
+  min-width: 0;
+}
+
+.history-caption {
+  margin: 8px 0 3px;
+  font-size: 11px;
+  color: var(--mb-dim);
+}
+
+.history-row {
+  display: contents;
+  cursor: pointer;
+}
+
+.hcell {
+  box-sizing: border-box;
+  height: 24px;
+  margin: 0 -1px -1px 0;
+  padding: 0 6px;
+  font-family: var(--mb-mono);
+  font-size: 13px;
+  line-height: 22px;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--mb-dim);
+  background: var(--mb-hist-bg);
+  border: 1px solid var(--mb-hist-border);
+}
+
+.hcell.changed {
+  color: var(--mb-fg);
+  background: var(--mb-changed);
+  border-color: var(--mb-changed-border);
+}
+
+.hcell.ref,
+.hcell.more,
+.hcell.empty-cells {
+  font-family: var(--mb-ui);
+  font-size: 11px;
+  font-style: italic;
+}
+
+.hstep {
+  padding: 0 0 0 10px;
+  font-size: 11px;
+  line-height: 24px;
+  white-space: nowrap;
+  color: var(--mb-dim);
+}
+
+.history-row:hover > .hcell:not(.changed) {
+  background: var(--mb-hist-hover);
+}
+
+.history-row:hover > .hstep {
+  color: var(--mb-fg);
+  text-decoration: underline;
+}
+
+.history-more {
+  margin-top: 4px;
+  font-size: 11px;
+  font-style: italic;
+  color: var(--mb-dim);
+}
+
 /* Objects: UML object notation (name compartment, attribute compartment) */
 
 .uml {
@@ -1166,7 +1251,8 @@ td.entry-key {
   display: none;
 }
 
-body:not(.has-classes) .legend-classes {
+body:not(.has-classes) .legend-classes,
+body:not(.has-array-history) .legend-array-history {
   display: none;
 }
 
@@ -1221,4 +1307,10 @@ body:not(.has-classes) .legend-classes {
 .changed-swatch {
   background: var(--mb-changed);
   border: 1px solid var(--mb-changed-border);
+}
+
+.history-swatch {
+  height: 10px;
+  background: var(--mb-hist-bg);
+  border: 1px solid var(--mb-hist-border);
 }
