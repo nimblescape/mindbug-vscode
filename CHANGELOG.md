@@ -3,6 +3,17 @@
 Each section lists the changes of one released version. The release workflow
 takes the section of a version as the notes of its GitHub release.
 
+## 0.3.2
+
+**Scope frames in files with Windows line ends.** In a file with Windows
+line ends (CRLF), which Git for Windows checks out by default, the
+rectangles of the switch **Show scope frames** were at the wrong lines:
+they started and ended lower than their block, the more the further down
+the file, and an inner rectangle could end below the outer one and below
+the function. Mindbug counted each line end as one character, but a
+Windows line end has two. Now the rectangles are at the same lines as in
+a file with Unix line ends (LF).
+
 ## 0.3.1
 
 **A new switch after an update without a reload.** When VS Code updated
