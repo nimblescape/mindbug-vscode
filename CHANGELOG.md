@@ -5,14 +5,15 @@ takes the section of a version as the notes of its GitHub release.
 
 ## 0.3.2
 
-**Scope frames in files with Windows line ends.** In a file with Windows
-line ends (CRLF), which Git for Windows checks out by default, the
-rectangles of the switch **Show scope frames** were at the wrong lines:
-they started and ended lower than their block, the more the further down
-the file, and an inner rectangle could end below the outer one and below
-the function. Mindbug counted each line end as one character, but a
-Windows line end has two. Now the rectangles are at the same lines as in
-a file with Unix line ends (LF).
+**Better Windows support: scope frames in files with Windows line ends.**
+Git for Windows checks out files with Windows line ends (CRLF) by default.
+In such a file, the rectangles of the switch **Show scope frames** were at
+the wrong lines: they started and ended lower than their block, the more
+the further down the file, and an inner rectangle could end below the
+outer one and below the function. Mindbug counted each line end as one
+character, but a Windows line end has two. Now the rectangles are at the
+right lines for every kind of line end, Windows (CRLF) or Unix (LF), on
+every operating system.
 
 ## 0.3.1
 
