@@ -196,6 +196,19 @@ export const VIEW_OPTION_NAMES = [
 ] as const satisfies readonly (keyof ViewOptions)[];
 
 /**
+ * Where a click on a switch of the view goes, from the settings as `WorkspaceConfiguration.inspect` gives them:
+ * - `user`: into the user settings.
+ * - `workspace`: nowhere, because the settings of the workspace set the switch; the click lasts until the view closes.
+ * - `unregistered`: nowhere, because VS Code does not know the setting. Every setting of a switch has a default, so a
+ *   setting without a default is not registered: VS Code updated Mindbug and restarted the extensions, but it loads the
+ *   settings of an updated extension only when the window reloads. The click lasts until the view closes.
+ */
+export function switchTarget(inspect: { defaultValue?: unknown; workspaceValue?: unknown } | undefined): 'user' | 'workspace' | 'unregistered' {
+  if (inspect?.defaultValue === undefined) return 'unregistered';
+  return inspect.workspaceValue !== undefined ? 'workspace' : 'user';
+}
+
+/**
  * The text at the end of the line of an earlier step in the editor, for example "Mindbug: step 8 of 14". It names the
  * step that the view shows and the newest step, as the view does above its step list.
  */

@@ -4,7 +4,7 @@
 
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { fromWebview, stepMarkText } from '../../src/model.ts';
+import { fromWebview, stepMarkText, switchTarget } from '../../src/model.ts';
 
 test('names the shown step and the newest step at the line of an earlier step', () => {
   assert.equal(stepMarkText(8, 14), 'Mindbug: step 8 of 14');
@@ -44,4 +44,13 @@ test('the messages of the view: only the known messages, with numbers for steps 
   ]) {
     assert.equal(fromWebview(bad), undefined, JSON.stringify(bad));
   }
+});
+
+test('a click on a switch goes into the user settings only when VS Code knows the setting and the workspace leaves it', () => {
+  assert.equal(switchTarget({ defaultValue: false }), 'user');
+  assert.equal(switchTarget({ defaultValue: false, workspaceValue: true }), 'workspace');
+  // VS Code updated the extension and restarted the extensions without a reload of the window: the new setting has no
+  // default yet.
+  assert.equal(switchTarget({ defaultValue: undefined }), 'unregistered');
+  assert.equal(switchTarget(undefined), 'unregistered');
 });
