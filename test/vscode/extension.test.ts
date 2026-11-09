@@ -1018,7 +1018,7 @@ describe('the Mindbug view in VS Code', () => {
       await api.saveViewOption('showFunctions', false);
       assert.equal(config().inspect('showFunctions')?.globalValue, undefined, 'the default removes the user setting');
     } finally {
-      for (const name of ['showFunctions', 'showClasses', 'showIds', 'showUninitialized', 'showScopeFrames', 'stopOnEntry']) {
+      for (const name of ['showFunctions', 'showClasses', 'showIds', 'showUninitialized', 'showScopeFrames', 'showArrayHistory', 'stopOnEntry']) {
         await config().update(name, undefined, vscode.ConfigurationTarget.Global);
       }
     }

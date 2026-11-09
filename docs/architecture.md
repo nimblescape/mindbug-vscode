@@ -87,6 +87,7 @@ The page shows data of the debugged program, so the extension does not trust its
 | --- | --- |
 | `webview/main.ts` | Receives the messages of the extension, keeps the step history, draws the selected step, and handles the toolbar, the step list and the keys. |
 | `webview/history.ts` | The step history of one session, without DOM code, so that unit tests use it. |
+| `webview/arrayHistory.ts` | The earlier states of an array in the steps of the step history, for the switch **Show array history**, without DOM code, so that unit tests use it. |
 | `webview/layout.ts` | Places the variables and the heap objects bottom up (see [Layout](#layout)). |
 | `webview/render.ts` | Builds the HTML of the scopes, the variables, the UML boxes, the arrays, the maps and the sets. |
 | `webview/arrows.ts` | Draws the arrows as one SVG layer above the stack and the heap. |
@@ -168,13 +169,14 @@ The view draws the stack and the heap bottom up, as a stack of memory grows:
 - **Block scopes**: the variables of each block scope are in a part of their own (`div.block`, a border in the color of its nesting level, with a label such as "for scope") inside the box of the frame, above the variables of the function. The part of an inner block is inside the part of the block around it, above its variables, so the parts nest like the braces in the code, and the innermost block is at the top. Each part builds bottom up like a scope.
 - **Heap rows**: each object that a variable points to starts a row, and the objects that it points to are placed to its right (`layoutHeap`). An object is placed only once, in the row of the oldest scope and the oldest variable that point to it; later references are arrows. The rows follow the order of the variables, so the objects of the Global scope are at the bottom, next to the Global scope.
 - **Classes**: in their own part at the top of the heap, a superclass before its subclasses.
+- **Array history**: with the switch **Show array history** (`ViewOptions.showArrayHistory`), an array has its earlier states below its cells, the newest at the top. `earlierStates` in `webview/arrayHistory.ts` takes them from the snapshots of the step history up to the shown step: a step where the array (the same object id) has other values or another length than at the step before starts a new state, and the state of the shown step is the array itself. The cells of the array and of the rows are in one CSS grid (`.cells.history-grid` in `renderArray`), so the cells of one index are in one column; the arrows still end at the cells of the array. A row carries the number of its step (`data-step`), and a click on it shows that step, as a click in the step list does. The extension sends nothing new for it: the page has the snapshots of the steps already.
 
 ## Where the data lives
 
 | Data | Where | How long |
 | --- | --- | --- |
 | The step history | The memory of the extension host (controller) and of the webview | Until the next debug session starts, the debug session restarts, or VS Code closes |
-| The switches of the toolbar | The settings `nimblescape.mindbug.showClasses`, `showFunctions`, `showIds`, `showUninitialized`, `showScopeFrames` and `stopOnEntry`: the page of the view gets them in the attribute `data-view-options`, a click on a switch sends `viewOption` with the name and the value of that switch, and the controller saves it in the user settings with `WorkspaceConfiguration.update`. A click on a switch that the settings of the workspace set stays in the memory of the controller (`viewOverrides`) until the view closes or the setting changes. The controller sends `viewOptions` when the settings change, and when the page of the view loads again | Until you change them |
+| The switches of the toolbar | The settings `nimblescape.mindbug.showClasses`, `showFunctions`, `showIds`, `showUninitialized`, `showScopeFrames`, `showArrayHistory` and `stopOnEntry`: the page of the view gets them in the attribute `data-view-options`, a click on a switch sends `viewOption` with the name and the value of that switch, and the controller saves it in the user settings with `WorkspaceConfiguration.update`. A click on a switch that the settings of the workspace set stays in the memory of the controller (`viewOverrides`) until the view closes or the setting changes. The controller sends `viewOptions` when the settings change, and when the page of the view loads again | Until you change them |
 | The numbers of the objects | A `WeakMap` of the helper in the program | While the program runs |
 | The global `__mindbug` | The program | While the program runs |
 

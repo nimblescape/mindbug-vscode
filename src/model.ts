@@ -146,8 +146,8 @@ export interface MemorySnapshot {
 
 /**
  * The switches of the view. The settings `nimblescape.mindbug.showFunctions`, `showIds`, `showClasses`,
- * `showUninitialized`, `showScopeFrames` and `stopOnEntry` keep them, so that the view has them again after it was
- * closed and after a restart of VS Code.
+ * `showUninitialized`, `showScopeFrames`, `showArrayHistory` and `stopOnEntry` keep them, so that the view has them
+ * again after it was closed and after a restart of VS Code.
  */
 export interface ViewOptions {
   showFunctions: boolean;
@@ -162,6 +162,11 @@ export interface ViewOptions {
    */
   showScopeFrames: boolean;
   /**
+   * Show the earlier states of each array below it: one row for each earlier step that changed the array, the newest
+   * at the top. For example the states of the array in the loop of a sort algorithm.
+   */
+  showArrayHistory: boolean;
+  /**
    * Pause at the first line of the program when "Run with Mindbug" or a launch configuration of type "mindbug" starts
    * it. It changes nothing in the view, only the next start of a program.
    */
@@ -175,6 +180,7 @@ export const DEFAULT_VIEW_OPTIONS: ViewOptions = {
   showClasses: true,
   showUninitialized: false,
   showScopeFrames: true,
+  showArrayHistory: false,
   stopOnEntry: true,
 };
 
@@ -185,6 +191,7 @@ export const VIEW_OPTION_NAMES = [
   'showClasses',
   'showUninitialized',
   'showScopeFrames',
+  'showArrayHistory',
   'stopOnEntry',
 ] as const satisfies readonly (keyof ViewOptions)[];
 
